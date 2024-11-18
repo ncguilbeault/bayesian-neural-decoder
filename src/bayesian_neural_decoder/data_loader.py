@@ -12,11 +12,11 @@ class DataLoader:
     @classmethod
     def load_sorted_spike_data(cls, 
                   dataset_path: str = "../../../datasets/decoder_data",
-                  bin_spikes: bool = True) -> dict:
+                  results_filename: str = "sorted_spike_decoding_results.pkl") -> dict:
 
-        decoding_results_filename = os.path.join(dataset_path, "sorted_spike_decoding_results.pkl")
+        decoding_results_filename = os.path.join(dataset_path, results_filename)
         if not os.path.exists(decoding_results_filename):
-            raise Exception("Dataset incorrect. Missing 'sorted_spike_decoding_results.pkl'")
+            raise Exception("Dataset incorrect. Missing decoding results file.")
 
         with open(decoding_results_filename, "rb") as f:
             results = pickle.load(f)
@@ -35,11 +35,12 @@ class DataLoader:
     
     @classmethod
     def load_clusterless_spike_data(cls, 
-                  dataset_path: str = "../../../datasets/decoder_data") -> dict:
+                  dataset_path: str = "../../../datasets/decoder_data",
+                  results_filename: str = "clusterless_spike_decoding_results.pkl") -> dict:
         
-        decoding_results_filename = os.path.join(dataset_path, "clusterless_spike_decoding_results_50Hz.pkl")
+        decoding_results_filename = os.path.join(dataset_path, results_filename)
         if not os.path.exists(decoding_results_filename):
-            raise Exception("Dataset incorrect. Missing 'clusterless_spike_decoding_results_50Hz.pkl'")
+            raise Exception("Dataset incorrect. Missing decoding results file.")
 
         with open(decoding_results_filename, "rb") as f:
             results = pickle.load(f)

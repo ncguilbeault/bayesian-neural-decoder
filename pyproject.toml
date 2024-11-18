@@ -14,5 +14,6 @@ dependencies = [
   "numpy",
   "pandas",
   "replay_trajectory_classification",
-  "plotly"
+  "plotly",
+  "cupy-cuda12x"
 ]

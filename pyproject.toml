@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 requires-python = ">= 3.8"
 version = "0.0.1"
 
-name = "bayesian-neural-decoder"
+name = "bayesian_neural_decoder"
 description = "This package provides tools for decoding neural data using a bayesian state-space model."
 readme = "README.md"
 

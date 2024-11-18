@@ -1,6 +1,6 @@
 # neural-decoding
 
-This package provides tools for decoding neural data using a bayesian state-space model.
+This package provides tools for decoding neural data using a bayesian state-space model. It is designed to implement the code from [here](https://github.com/Eden-Kramer-Lab/replay_trajectory_classification) and can be used for running online decoding in bonsai.
 
 You can read more about the technique here: 
 
@@ -17,8 +17,4 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-For GPU support, also run:
-
-```
-pip install cupy
-```
+>[!NOTE] The package uses `cupy-cuda12x` for GPU support which requires CUDA v12 to be installed seperately.

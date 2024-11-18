@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+requires-python = ">= 3.8"
+version = "0.1.0"
+dynamic = ["version"]
+
+name = "neural-decoding"
+description = "This package provides tools for decoding neural data."
+readme = "README.md"
+
+dependencies = [
+  "numpy",
+  "pandas",
+  "replay_trajectory_classification",
+  "plotly"
+]

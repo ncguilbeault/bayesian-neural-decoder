@@ -6,6 +6,7 @@ from replay_trajectory_classification.likelihoods.multiunit_likelihood import es
 
 from .likelihood import LIKELIHOOD_FUNCTION
 
+import os
 import numpy as np
 import pickle as pkl
 import cupy as cp
@@ -19,6 +20,10 @@ class Decoder():
     
     @classmethod
     def load(cls, filename: str):
+        
+        if not os.path.exists(filename):
+            raise Exception("Decoder path incorrect.")
+        
         with open(filename, "rb") as f:
             return cls(pkl.load(f))
 

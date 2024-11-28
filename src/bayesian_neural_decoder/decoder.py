@@ -122,6 +122,7 @@ class SortedSpikeDecoder(Decoder):
     def __init__(self, model_dict: dict):
         super(SortedSpikeDecoder, self).__init__()
         self.decoder = model_dict["decoder"]
+        self.position_grid_2D = model_dict["position_grid_2D"]
 
         self.is_track_interior = self.decoder.environment.is_track_interior_.ravel(order="F")
         self.st_interior_ind = np.ix_(self.is_track_interior, self.is_track_interior)
@@ -160,3 +161,9 @@ class SortedSpikeDecoder(Decoder):
         self.posterior /= norm
 
         return (self.posterior, self.place_bin_centers)
+    
+    def project_decoded_position_2D(self):
+        self.projected_decoded_position_2D = self.position_grid_2D.copy()
+        for i in range(self.n_position_bins):
+            position_idx = self.project_1D_position_to_2D(self.posterior[i])
+            self.position_grid_2D[position_idx] = self.posterior[i]

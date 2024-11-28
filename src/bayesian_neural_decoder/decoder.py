@@ -15,6 +15,7 @@ class Decoder():
     def __init__(self):
         super().__init__()
         self.decoder = None
+        self.place_bin_centers_df = None
 
     def decode(self, data: np.ndarray):
         raise NotImplementedError
@@ -29,7 +30,8 @@ class Decoder():
             return cls(pkl.load(f))
         
     def project_1D_position_to_2D(self, position_1D: float):
-        return self.decoder.environment.place_bin_centers_nodes_df_.iloc[position_1D]["x_position", "y_position"].to_numpy()
+        idx = np.histogram(position_1D, bins=self.place_bin_centers_df["linear_position"])[0].argmax()
+        return self.place_bin_centers_df.iloc[idx]["x_position", "y_position"].to_numpy()
 
 class ClusterlessSpikeDecoder(Decoder):
     def __init__(self, model_dict: dict):
@@ -50,6 +52,7 @@ class ClusterlessSpikeDecoder(Decoder):
 
         self.place_bin_centers = self.decoder.environment.place_bin_centers_
         self.place_bin_centers_1D = self.place_bin_centers.squeeze()
+        self.place_bin_centers_df = self.decoder.environment.place_bin_centers_nodes_df_
         self.is_track_interior = self.decoder.environment.is_track_interior_.ravel(order="F")
         self.st_interior_ind = np.ix_(self.is_track_interior, self.is_track_interior)
 
@@ -128,6 +131,7 @@ class SortedSpikeDecoder(Decoder):
         self.state_transition = self.decoder.state_transition_[self.st_interior_ind].astype(float)
         self.place_fields = np.asarray(self.decoder.place_fields_)
         self.place_bin_centers = self.decoder.environment.place_bin_centers_.squeeze()
+        self.place_bin_centers_df = self.decoder.environment.place_bin_centers_nodes_df_
         self.conditional_intensity = np.clip(self.place_fields, a_min=1e-15, a_max=None)
 
         self.likelihood_function = LIKELIHOOD_FUNCTION[self.decoder.sorted_spikes_algorithm]

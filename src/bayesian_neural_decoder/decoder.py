@@ -33,6 +33,7 @@ class Decoder():
 
 class ClusterlessSpikeDecoder(Decoder):
     def __init__(self, model_dict: dict):
+        super(ClusterlessSpikeDecoder, self).__init__()
         self.decoder = model_dict["decoder"]
 
         encoding_model = self.decoder.encoding_model_
@@ -80,7 +81,6 @@ class ClusterlessSpikeDecoder(Decoder):
         self.state_transition = self.decoder.state_transition_[self.st_interior_ind].astype(float)
 
         self.posterior = None
-        super().__init__()
 
     @classmethod
     def load(cls, filename: str = "../../../datasets/decoder_data/clusterless_spike_decoder.pkl"):
@@ -117,6 +117,7 @@ class ClusterlessSpikeDecoder(Decoder):
 
 class SortedSpikeDecoder(Decoder):
     def __init__(self, model_dict: dict):
+        super(SortedSpikeDecoder, self).__init__()
         self.decoder = model_dict["decoder"]
 
         self.is_track_interior = self.decoder.environment.is_track_interior_.ravel(order="F")
@@ -132,7 +133,6 @@ class SortedSpikeDecoder(Decoder):
         self.likelihood_function = LIKELIHOOD_FUNCTION[self.decoder.sorted_spikes_algorithm]
 
         self.posterior = None
-        super().__init__()
 
     @classmethod
     def load(cls, filename: str = "../../../datasets/decoder_data/sorted_spike_decoder.pkl"):

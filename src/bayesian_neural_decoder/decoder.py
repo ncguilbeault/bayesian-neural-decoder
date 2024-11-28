@@ -16,6 +16,8 @@ class Decoder():
         super().__init__()
         self.decoder = None
         self.place_bin_centers_df = None
+        self.position_grid_2D = None
+        self.is_track_interior = None
 
     def decode(self, data: np.ndarray):
         raise NotImplementedError
@@ -32,6 +34,12 @@ class Decoder():
     def project_1D_position_to_2D(self, position_1D: float):
         idx = np.histogram(position_1D, bins=self.place_bin_centers_df["linear_position"])[0].argmax()
         return self.place_bin_centers_df.iloc[idx][["x_position", "y_position"]].to_numpy(dtype=float)
+    
+    def get_posterior_2D(self, posterior: np.ndarray):
+        posterior_2D = self.position_grid_2D.copy()
+        position_idx = np.round(self.place_bin_centers_df.loc[self.is_track_interior][["x_position", "y_position"]].to_numpy(dtype=float), 0).astype(int)
+        posterior_2D[position_idx[:,0], position_idx[:,1]] = posterior[self.is_track_interior]
+        return posterior_2D
 
 class ClusterlessSpikeDecoder(Decoder):
     def __init__(self, model_dict: dict):
@@ -116,7 +124,10 @@ class ClusterlessSpikeDecoder(Decoder):
         norm = np.nansum(self.posterior)
         self.posterior /= norm
 
-        return (self.posterior, self.place_bin_centers_1D)
+        self.position_2D = self.project_1D_position_to_2D(data)
+        self.posterior_2D = self.get_posterior_2D(self.posterior)
+
+        return (self.posterior, self.place_bin_centers_1D, self.position_2D, self.posterior_2D)
 
 class SortedSpikeDecoder(Decoder):
     def __init__(self, model_dict: dict):
@@ -160,9 +171,7 @@ class SortedSpikeDecoder(Decoder):
         norm = np.nansum(self.posterior)
         self.posterior /= norm
 
-        return (self.posterior, self.place_bin_centers)
-    
-    def project_decoded_position_2D(self):
-        self.projected_decoded_position_2D = self.position_grid_2D.copy()
-        position_idx = np.round(self.place_bin_centers_df.loc[self.is_track_interior][["x_position", "y_position"]].to_numpy(dtype=float), 0).astype(int)
-        self.projected_decoded_position_2D[position_idx[:,0], position_idx[:,1]] = self.posterior[self.is_track_interior]
+        self.position_2D = self.project_1D_position_to_2D(data)
+        self.posterior_2D = self.get_posterior_2D(self.posterior)
+
+        return (self.posterior, self.place_bin_centers, self.position_2D, self.posterior_2D)

@@ -164,6 +164,5 @@ class SortedSpikeDecoder(Decoder):
     
     def project_decoded_position_2D(self):
         self.projected_decoded_position_2D = self.position_grid_2D.copy()
-        for i in range(self.n_position_bins):
-            position_idx = self.project_1D_position_to_2D(self.posterior[i])
-            self.position_grid_2D[np.round(position_idx, 0).astype(int)] = self.posterior[i]
+        position_idx = np.round(self.place_bin_centers_df.loc[self.is_track_interior][["x_position", "y_position"]].to_numpy(dtype=float), 0).astype(int)
+        self.projected_decoded_position_2D[position_idx[:,0], position_idx[:,1]] = self.posterior[self.is_track_interior]

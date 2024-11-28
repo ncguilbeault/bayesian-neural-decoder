@@ -31,7 +31,7 @@ class Decoder():
         
     def project_1D_position_to_2D(self, position_1D: float):
         idx = np.histogram(position_1D, bins=self.place_bin_centers_df["linear_position"])[0].argmax()
-        return self.place_bin_centers_df.iloc[idx]["x_position", "y_position"].to_numpy()
+        return self.place_bin_centers_df.iloc[idx][["x_position", "y_position"]].to_numpy()
 
 class ClusterlessSpikeDecoder(Decoder):
     def __init__(self, model_dict: dict):

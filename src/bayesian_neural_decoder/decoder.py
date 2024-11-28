@@ -124,10 +124,9 @@ class ClusterlessSpikeDecoder(Decoder):
         norm = np.nansum(self.posterior)
         self.posterior /= norm
 
-        self.position_2D = self.project_1D_position_to_2D(data)
         self.posterior_2D = self.get_posterior_2D(self.posterior)
 
-        return (self.posterior, self.place_bin_centers_1D, self.position_2D, self.posterior_2D)
+        return (self.posterior, self.place_bin_centers_1D, self.posterior_2D)
 
 class SortedSpikeDecoder(Decoder):
     def __init__(self, model_dict: dict):
@@ -171,7 +170,6 @@ class SortedSpikeDecoder(Decoder):
         norm = np.nansum(self.posterior)
         self.posterior /= norm
 
-        self.position_2D = self.project_1D_position_to_2D(data)
         self.posterior_2D = self.get_posterior_2D(self.posterior)
 
-        return (self.posterior, self.place_bin_centers, self.position_2D, self.posterior_2D)
+        return (self.posterior, self.place_bin_centers, self.posterior_2D)

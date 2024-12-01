@@ -2,7 +2,8 @@ from replay_trajectory_classification.core import scaled_likelihood
 import replay_trajectory_classification.likelihoods.multiunit_likelihood as ml 
 import replay_trajectory_classification.likelihoods.multiunit_likelihood_gpu as mlgpu
 import replay_trajectory_classification.likelihoods.multiunit_likelihood_integer_gpu as mligpu
-from replay_trajectory_classification.likelihoods.spiking_likelihood_kde import poisson_log_likelihood
+import replay_trajectory_classification.likelihoods.spiking_likelihood_kde as slk
+import replay_trajectory_classification.likelihoods.spiking_likelihood_kde_gpu as slkgpu
 
 import numpy as np
 import cupy as cp
@@ -11,10 +12,24 @@ def spiking_likelihood_kde(spikes, conditional_intensity, is_track_interior):
 
     log_likelihood = 0
     for spike, ci in zip(spikes, conditional_intensity.T):
-        log_likelihood += poisson_log_likelihood(spike[np.newaxis], ci)
+        log_likelihood += slk.poisson_log_likelihood(spike[np.newaxis], ci)
 
     mask = np.ones_like(is_track_interior, dtype=float)
     mask[~is_track_interior] = np.nan
+    
+    likelihood = scaled_likelihood(log_likelihood * mask)
+    likelihood = likelihood[:, is_track_interior].astype(float)
+
+    return likelihood
+
+def spiking_likelihood_kde_gpu(spikes, conditional_intensity, is_track_interior):
+    
+    log_likelihood = 0
+    for spike, ci in zip(spikes, conditional_intensity.T):
+        log_likelihood += slkgpu.poisson_log_likelihood(spike[np.newaxis], ci)
+
+    mask = cp.ones_like(is_track_interior, dtype=cp.float32)
+    mask[~is_track_interior] = cp.nan
     
     likelihood = scaled_likelihood(log_likelihood * mask)
     likelihood = likelihood[:, is_track_interior].astype(float)

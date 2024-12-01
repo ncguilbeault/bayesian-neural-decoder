@@ -23,10 +23,14 @@ class DataLoader:
             predictions = decoding_results.acausal_posterior.to_numpy()
             position_data = results["linear_position"]
             spikes = results["spikes"]
+            position_2D = results["position_2D"]
+            position_bins_2D = results["position_bins_2D"][np.newaxis]
 
         return {
             "position_data": position_data,
             "spikes": spikes,
             "predictions": predictions,
-            "position_bins": position_bins
+            "position_bins": position_bins,
+            "position_2D": position_2D,
+            "position_bins_2D": position_bins_2D
         }

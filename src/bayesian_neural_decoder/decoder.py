@@ -10,14 +10,12 @@ import os
 import numpy as np
 import pickle as pkl
 import cupy as cp
+import pandas as pd
 
 class Decoder():
     def __init__(self):
         super().__init__()
         self.decoder = None
-        self.place_bin_centers_df = None
-        self.position_grid_2D = None
-        self.is_track_interior = None
 
     def decode(self, data: np.ndarray):
         raise NotImplementedError
@@ -30,16 +28,6 @@ class Decoder():
         
         with open(filename, "rb") as f:
             return cls(pkl.load(f))
-        
-    def project_1D_position_to_2D(self, position_1D: float):
-        idx = np.histogram(position_1D, bins=self.place_bin_centers_df["linear_position"])[0].argmax()
-        return self.place_bin_centers_df.iloc[idx][["x_position", "y_position"]].to_numpy(dtype=float)
-    
-    def get_posterior_2D(self, posterior: np.ndarray):
-        posterior_2D = self.position_grid_2D.copy()
-        position_idx = np.round(self.place_bin_centers_df.loc[self.is_track_interior][["x_position", "y_position"]].to_numpy(dtype=float), 0).astype(int)
-        posterior_2D[position_idx[:,0], position_idx[:,1]] = posterior[self.is_track_interior]
-        return posterior_2D
 
 class ClusterlessSpikeDecoder(Decoder):
     def __init__(self, model_dict: dict):
@@ -124,15 +112,13 @@ class ClusterlessSpikeDecoder(Decoder):
         norm = np.nansum(self.posterior)
         self.posterior /= norm
 
-        self.posterior_2D = self.get_posterior_2D(self.posterior)
-
-        return (self.posterior, self.place_bin_centers_1D, self.posterior_2D)
+        return (self.posterior, self.place_bin_centers_1D)
 
 class SortedSpikeDecoder(Decoder):
     def __init__(self, model_dict: dict):
         super(SortedSpikeDecoder, self).__init__()
         self.decoder = model_dict["decoder"]
-        self.position_grid_2D = model_dict["position_grid_2D"]
+        self.track_graph = model_dict["track_graph"]
 
         self.is_track_interior = self.decoder.environment.is_track_interior_.ravel(order="F")
         self.st_interior_ind = np.ix_(self.is_track_interior, self.is_track_interior)
@@ -170,6 +156,4 @@ class SortedSpikeDecoder(Decoder):
         norm = np.nansum(self.posterior)
         self.posterior /= norm
 
-        self.posterior_2D = self.get_posterior_2D(self.posterior)
-
-        return (self.posterior, self.place_bin_centers, self.posterior_2D)
+        return (self.posterior, self.place_bin_centers)

@@ -33,23 +33,25 @@ class ClusterlessSpikeDecoder(Decoder):
     def __init__(self, model_dict: dict):
         super(ClusterlessSpikeDecoder, self).__init__()
         self.decoder = model_dict["decoder"]
+        self.track_graph = model_dict["track_graph"]
 
-        encoding_model = self.decoder.encoding_model_
-        self.encoding_marks = encoding_model["encoding_marks"]
-        self.mark_std = encoding_model["mark_std"]
-        self.encoding_positions = encoding_model["encoding_positions"]
-        self.position_std = encoding_model["position_std"]
-        self.occupancy = encoding_model["occupancy"]
-        self.mean_rates = encoding_model["mean_rates"]
-        self.summed_ground_process_intensity = encoding_model["summed_ground_process_intensity"]
-        self.block_size = encoding_model["block_size"]
-        self.bin_diffusion_distances = encoding_model["bin_diffusion_distances"]
-        self.edges = encoding_model["edges"]
+        self.encoding_model = self.decoder.encoding_model_
+        self.encoding_marks = self.encoding_model["encoding_marks"]
+        self.mark_std = self.encoding_model["mark_std"]
+        self.encoding_positions = self.encoding_model["encoding_positions"]
+        self.position_std = self.encoding_model["position_std"]
+        self.occupancy = self.encoding_model["occupancy"]
+        self.mean_rates = self.encoding_model["mean_rates"]
+        self.summed_ground_process_intensity = self.encoding_model["summed_ground_process_intensity"]
+        self.block_size = self.encoding_model["block_size"]
+        self.bin_diffusion_distances = self.encoding_model["bin_diffusion_distances"]
+        self.edges = self.encoding_model["edges"]
 
-        self.place_bin_centers = self.decoder.environment.place_bin_centers_
+        self.environment = self.decoder.environment
+        self.place_bin_centers = self.environment.place_bin_centers_
         self.place_bin_centers_1D = self.place_bin_centers.squeeze()
-        self.place_bin_centers_df = self.decoder.environment.place_bin_centers_nodes_df_
-        self.is_track_interior = self.decoder.environment.is_track_interior_.ravel(order="F")
+        self.place_bin_centers_df = self.environment.place_bin_centers_nodes_df_
+        self.is_track_interior = self.environment.is_track_interior_.ravel(order="F")
         self.st_interior_ind = np.ix_(self.is_track_interior, self.is_track_interior)
 
         self.likelihood_function = LIKELIHOOD_FUNCTION[self.decoder.clusterless_algorithm]
@@ -127,8 +129,9 @@ class SortedSpikeDecoder(Decoder):
         self.initial_conditions = self.decoder.initial_conditions_[self.is_track_interior].astype(float)
         self.state_transition = self.decoder.state_transition_[self.st_interior_ind].astype(float)
         self.place_fields = np.asarray(self.decoder.place_fields_)
-        self.place_bin_centers = self.decoder.environment.place_bin_centers_.squeeze()
-        self.place_bin_centers_df = self.decoder.environment.place_bin_centers_nodes_df_
+        self.environment = self.decoder.environment
+        self.place_bin_centers = self.environment.place_bin_centers_.squeeze()
+        self.place_bin_centers_df = self.environment.place_bin_centers_nodes_df_
         self.conditional_intensity = np.clip(self.place_fields, a_min=1e-15, a_max=None)
 
         self.likelihood_function = LIKELIHOOD_FUNCTION[self.decoder.sorted_spikes_algorithm]
